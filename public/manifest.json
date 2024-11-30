@@ -7,6 +7,16 @@
     "host_permissions": ["https://*.facebook.com/*", "https://*.twitter.com/*", "https://*.instagram.com/*"],
     "action": {
       "default_popup": "index.html"
-    }
+    },
+    "content_scripts": [
+      {
+        "matches": [
+          "https://*.facebook.com/*",
+          "https://*.twitter.com/*",
+          "https://*.instagram.com/*"
+        ],
+        "js": ["content.js"]
+      }
+    ]
   }
   
