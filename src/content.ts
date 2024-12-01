@@ -66,10 +66,12 @@ async function fetchPostMetadata(shortcode: string) {
 }
 
 // Extract shortcode from a post's URL
-function extractShortcodeFromUrl(url: string | null | undefined) {
+function extractShortcodeFromUrl(
+  url: string | null | undefined
+): string | null {
   if (typeof url === "string") {
-    const match = url.match(/\/p\/([^/]+)\//);
-    return match ? match[1] : null;
+    const match = url.match(/\/(p|r)\/([^/]+)\//);
+    return match ? match[2] : null;
   }
   return null;
 }
@@ -87,7 +89,9 @@ async function processNewPosts() {
     const newArticles = Array.from(articles).slice(previousArticleCount);
 
     for (const article of newArticles) {
-      const linkElement = article.querySelector('a[href*="/p/"]');
+      const linkElement = article.querySelector(
+        'a[href*="/p/"], a[href*="/r/"]'
+      );
       const postLink = linkElement?.getAttribute("href");
       const shortcode = postLink ? extractShortcodeFromUrl(postLink) : null;
 
@@ -97,7 +101,7 @@ async function processNewPosts() {
 
         if (postData) {
           // Example: Highlight posts containing MLM-related keywords
-          const caption = postData.captions.forEach(() => {
+          postData.captions?.forEach((caption: any) => {
             if (caption.toLowerCase().includes("mlm")) {
               article.style.border = "2px solid red"; // Mark flagged posts
               console.log(`Flagged MLM post: ${caption}`);
