@@ -101,12 +101,8 @@ async function processNewPosts() {
 
         if (postData) {
           // Example: Highlight posts containing MLM-related keywords
-          postData.captions?.forEach((caption: any) => {
-            if (caption.toLowerCase().includes("mlm")) {
-              article.style.border = "2px solid red"; // Mark flagged posts
-              console.log(`Flagged MLM post: ${caption}`);
-              return;
-            }
+          postData.captions?.forEach(() => {
+            article.style.border = "2px solid red"; // Mark flagged posts
           });
         }
       }
