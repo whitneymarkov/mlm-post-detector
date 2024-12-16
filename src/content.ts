@@ -3,29 +3,14 @@ import jmespath from "jmespath";
 const GRAPHQL_ENDPOINT = "https://www.instagram.com/graphql/query";
 const INSTAGRAM_DOCUMENT_ID = "8845758582119845"; // Static document ID for posts
 
-let previousArticleCount = 0; // Track the number of observed articles
-
-/**
- * 
- *     likes: edge_media_preview_like.count,
-    tagged_users: edge_media_to_tagged_user.edges[].node.user.username,
-    is_ad: is_ad,
-    is_affiliate: is_affiliate,
-    is_paid_partnership: is_paid_partnership,
- */
 function parsePostData(data: Record<string, any>) {
   const parsedData = jmespath.search(
     data,
-    `{
-    id: id,
-    shortcode: shortcode,
-    captions: edge_media_to_caption.edges[].node.text
-  }`
+    `xdt_shortcode_media.edge_media_to_caption.edges[0].node.text`
   );
   return parsedData;
 }
 
-// Fetch post metadata using Instagram's GraphQL API
 async function fetchPostMetadata(shortcode: string) {
   const variables = {
     shortcode,
@@ -52,23 +37,22 @@ async function fetchPostMetadata(shortcode: string) {
     }
 
     const result = await response.json();
-    const data = result.data.xdt_shortcode_media;
+    const data = result.data;
     if (data) {
-      const parsedData = parsePostData(data);
-      console.log("GraphQL Post Data:", parsedData);
-      return parsedData;
+      const captions = parsePostData(data);
+      if (captions) {
+        return captions;
+      }
     }
-    throw new Error(`Data error: data.xdt_shortcode_media missing`);
+    throw new Error(`Data error: captions missing`);
   } catch (error) {
     console.error("Failed to fetch post data:", error);
     return null;
   }
 }
 
-// Extract shortcode from a post's URL
-function extractShortcodeFromUrl(
-  url: string | null | undefined
-): string | null {
+// Utility function to extract shortcode from a given URL
+function extractShortcodeFromUrl(url: string) {
   if (typeof url === "string") {
     const match = url.match(/\/(p|r)\/([^/]+)\//);
     return match ? match[2] : null;
@@ -76,69 +60,157 @@ function extractShortcodeFromUrl(
   return null;
 }
 
-// Process new posts to fetch their metadata and perform actions
-async function processNewPosts() {
-  const articles = document.querySelectorAll("article");
-  const currentArticleCount = articles.length;
+async function handleButtonClick(event: any) {
+  const button = event.currentTarget as HTMLButtonElement;
+  const originalText = button.textContent;
+  const shortCode = button.getAttribute("data-shortcode");
+  if (shortCode) {
+    // Indicate loading
+    button.textContent = "Analysing...";
+    button.disabled = true;
 
-  if (currentArticleCount > previousArticleCount) {
-    console.log(
-      `New posts detected! Old count: ${previousArticleCount}, New count: ${currentArticleCount}`
-    );
+    try {
+      const caption = await fetchPostMetadata(shortCode);
+      console.log(JSON.stringify(caption));
 
-    const newArticles = Array.from(articles).slice(previousArticleCount);
+      chrome.runtime.sendMessage(
+        {
+          type: "analyse",
+          payload: { post_content: caption },
+        },
+        (response) => {
+          // runs once background script responds
+          if (response && response.prediction) {
+            console.log(
+              "%cPrediction:",
+              "font-size:16px; font-weight:bold;",
+              "%c" + response.prediction,
+              "font-size:16px; font-weight:bold;"
+            );
+          } else {
+            console.warn("Analysis failed or no prediction received.");
+          }
 
-    for (const article of newArticles) {
-      const linkElement = article.querySelector(
-        'a[href*="/p/"], a[href*="/r/"]'
-      );
-      const postLink = linkElement?.getAttribute("href");
-      const shortcode = postLink ? extractShortcodeFromUrl(postLink) : null;
-
-      if (shortcode) {
-        console.log(`Fetching metadata for shortcode: ${shortcode}`);
-        const postData = await fetchPostMetadata(shortcode);
-
-        if (postData) {
-          // Example: Highlight posts containing MLM-related keywords
-          postData.captions?.forEach(() => {
-            article.style.border = "2px solid red"; // Mark flagged posts
-          });
+          // Revert the button text and state
+          button.textContent = originalText;
+          button.disabled = false;
         }
-      }
+      );
+    } catch (error) {
+      console.warn(error);
+      button.textContent = "Analysis failed.";
+    } finally {
+      // Revert the button text and state
+      button.textContent = originalText;
+      button.disabled = false;
     }
-
-    previousArticleCount = currentArticleCount; // Update the count
   }
 }
 
-// Observe new articles and throttle the processing
-function observeNewArticles() {
-  const throttledProcessNewPosts = (() => {
-    let isProcessing = false;
+// Add or update the button for the article
+function addOrUpdateButton(article: HTMLElement, shortcode: string) {
+  let button = article.querySelector(".mlm-detector-button");
 
-    return () => {
-      if (isProcessing) return; // Skip if already processing
-      isProcessing = true;
+  if (!button) {
+    button = document.createElement("button");
+    button.textContent = "Analyse post";
+    button.classList.add("mlm-detector-button");
+    button.addEventListener("click", handleButtonClick);
+  }
 
-      setTimeout(async () => {
-        await processNewPosts();
-        isProcessing = false;
-      }, 1000); // Throttle requests to avoid API rate-limiting
-    };
-  })();
+  // Find the bookmark icon by its aria-label
+  const bookmarkSvg = article.querySelector('svg[aria-label="Save"]');
+  if (bookmarkSvg) {
+    // Move up to the nearest containing section
+    const section = bookmarkSvg.closest("section");
 
-  const observer = new MutationObserver(() => {
-    console.log("Mutation observed!");
-    throttledProcessNewPosts();
-  });
+    if (section) {
+      // Get all direct children of the section that are divs
+      const sectionChildren = Array.from(section.children).filter(
+        (el: any) => el.tagName === "DIV"
+      );
 
-  observer.observe(document.body, { childList: true, subtree: true });
+      // Check if there's at least two divs
+      if (sectionChildren.length >= 2) {
+        const targetDiv = sectionChildren[1] as HTMLDivElement; // The second div child
+        if (button.parentElement !== targetDiv) {
+          targetDiv.appendChild(button);
+          targetDiv.style.display = "flex";
+          targetDiv.style.flexDirection = "row-reverse";
+        }
+      } else {
+        // Fallback: append to article if structure not as expected
+        article.appendChild(button);
+      }
+    } else {
+      // No section found, fallback
+      article.appendChild(button);
+    }
+  } else {
+    // No bookmark icon found, fallback
+    article.appendChild(button);
+  }
 
-  previousArticleCount = document.querySelectorAll("article").length;
-  console.log(`Initial article count: ${previousArticleCount}`);
+  // Update the button shortcode attribute
+  button.setAttribute("data-shortcode", shortcode);
 }
 
-// Start observing
-console.log("Content script loaded");
+// Observe changes inside a single article
+function observeArticle(article: any) {
+  const articleObserver = new MutationObserver(() => {
+    const linkElement = article.querySelector('a[href*="/p/"], a[href*="/r/"]');
+    const postLink = linkElement?.getAttribute("href");
+    const shortcode = postLink ? extractShortcodeFromUrl(postLink) : null;
+
+    if (shortcode) {
+      addOrUpdateButton(article, shortcode);
+    }
+  });
+
+  articleObserver.observe(article, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Run once initially to set things up if already loaded
+  const initialLink = article.querySelector('a[href*="/p/"], a[href*="/r/"]');
+  if (initialLink) {
+    const initialShortcode = extractShortcodeFromUrl(
+      initialLink.getAttribute("href")
+    );
+    if (initialShortcode) {
+      addOrUpdateButton(article, initialShortcode);
+    }
+  }
+}
+
+// Main observer to detect new articles
+function observeNewArticles() {
+  const mainObserver = new MutationObserver(() => {
+    const articles = document.querySelectorAll("article");
+    // For each article, if not already initialized, start observing it
+    articles.forEach((article) => {
+      if (!article.hasAttribute("data-observed")) {
+        article.setAttribute("data-observed", "true");
+        observeArticle(article);
+      }
+    });
+  });
+
+  mainObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Check initially if there are any articles already present
+  const initialArticles = document.querySelectorAll("article");
+  initialArticles.forEach((article) => {
+    if (!article.hasAttribute("data-observed")) {
+      article.setAttribute("data-observed", "true");
+      observeArticle(article);
+    }
+  });
+}
+
+// Start the whole process
 observeNewArticles();

@@ -3,8 +3,8 @@
     "name": "MLM post detector",
     "version": "1.0",
     "description": "A Chrome extension that uses machine learning to detect Multi-level Marketing related content",
-    "permissions": ["activeTab", "scripting", "storage"],
-    "host_permissions": ["https://*.facebook.com/*", "https://*.twitter.com/*", "https://*.instagram.com/*"],
+    "permissions": ["activeTab", "scripting", "storage", "http://127.0.0.1:5000/"],
+    "host_permissions": ["https://*.facebook.com/*", "https://*.twitter.com/*", "https://*.instagram.com/*", "http://127.0.0.1:5000/*"],
     "action": {
       "default_popup": "index.html"
     },
@@ -17,6 +17,9 @@
         ],
         "js": ["content.js"]
       }
-    ]
+    ],
+    "background": {
+      "service_worker": "background.js"
+    }
   }
   

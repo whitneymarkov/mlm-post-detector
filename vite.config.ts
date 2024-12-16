@@ -9,7 +9,7 @@ export default defineConfig({
       input: {
         popup: "index.html",
         content: "src/content.ts",
-        // background: "src/background.ts",
+        background: "src/background.ts",
       },
       output: {
         entryFileNames: "[name].js",
