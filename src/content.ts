@@ -3,6 +3,10 @@ import jmespath from "jmespath";
 const GRAPHQL_ENDPOINT = "https://www.instagram.com/graphql/query";
 const INSTAGRAM_DOCUMENT_ID = "8845758582119845"; // Static document ID for posts
 
+/**
+ * Parses GRAPHQL POST response
+ * @param data
+ */
 function parsePostData(data: Record<string, any>) {
   const parsedData = jmespath.search(
     data,
@@ -11,6 +15,10 @@ function parsePostData(data: Record<string, any>) {
   return parsedData;
 }
 
+/**
+ * Fetchs the full post data from instagram GRAPHQL endpoint using shortcode
+ * @param shortcode
+ */
 async function fetchPostMetadata(shortcode: string) {
   const variables = {
     shortcode,
@@ -51,7 +59,10 @@ async function fetchPostMetadata(shortcode: string) {
   }
 }
 
-// Utility function to extract shortcode from a given URL
+/**
+ * Utility function to extract shortcode from a given URL
+ * @param url
+ */
 function extractShortcodeFromUrl(url: string) {
   if (typeof url === "string") {
     const match = url.match(/\/(p|r)\/([^/]+)\//);
@@ -60,6 +71,10 @@ function extractShortcodeFromUrl(url: string) {
   return null;
 }
 
+/**
+ * Handler for when the analyse post button is clicked
+ * @param event
+ */
 async function handleButtonClick(event: any) {
   const button = event.currentTarget as HTMLButtonElement;
   const originalText = button.textContent;
@@ -107,7 +122,11 @@ async function handleButtonClick(event: any) {
   }
 }
 
-// Add or update the button for the article
+/**
+ * Add or update the button for the article
+ * @param article
+ * @param shortcode
+ */
 function addOrUpdateButton(article: HTMLElement, shortcode: string) {
   let button = article.querySelector(".mlm-detector-button");
 
@@ -151,11 +170,13 @@ function addOrUpdateButton(article: HTMLElement, shortcode: string) {
     article.appendChild(button);
   }
 
-  // Update the button shortcode attribute
   button.setAttribute("data-shortcode", shortcode);
 }
 
-// Observe changes inside a single article
+/**
+ * Observe changes inside a single article, update button when changed
+ * @param article
+ */
 function observeArticle(article: any) {
   const articleObserver = new MutationObserver(() => {
     const linkElement = article.querySelector('a[href*="/p/"], a[href*="/r/"]');
@@ -184,11 +205,13 @@ function observeArticle(article: any) {
   }
 }
 
-// Main observer to detect new articles
+/**
+ * Main observer to detect new articles
+ */
 function observeNewArticles() {
   const mainObserver = new MutationObserver(() => {
     const articles = document.querySelectorAll("article");
-    // For each article, if not already initialized, start observing it
+    // If article not already initialised, start observing it
     articles.forEach((article) => {
       if (!article.hasAttribute("data-observed")) {
         article.setAttribute("data-observed", "true");
@@ -202,7 +225,7 @@ function observeNewArticles() {
     subtree: true,
   });
 
-  // Check initially if there are any articles already present
+  // Check if any articles already present
   const initialArticles = document.querySelectorAll("article");
   initialArticles.forEach((article) => {
     if (!article.hasAttribute("data-observed")) {
@@ -212,5 +235,4 @@ function observeNewArticles() {
   });
 }
 
-// Start the whole process
 observeNewArticles();
