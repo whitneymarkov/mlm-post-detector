@@ -1,3 +1,8 @@
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Disable parallelism
+
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
@@ -5,6 +10,10 @@ from clean_text import CleanText
 from extract_features import ExtractFeatures
 from scipy.sparse import hstack, csr_matrix
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+import torch
+import torch.nn.functional as F
+import shap
+from predict_BERT import PredictBERT
 
 app = Flask(__name__)
 CORS(app)
@@ -17,9 +26,14 @@ vectorizer = joblib.load("models/BoW/bow_vectorizer.pkl")
 bert_model = AutoModelForSequenceClassification.from_pretrained("./models/BERT/model")
 bert_tokenizer = AutoTokenizer.from_pretrained("./models/BERT/tokenizer")
 
-# Initialize the CleanText class
-preprocessor_bow = CleanText(for_ml_pipeline=True)  # BoW
-preprocessor_bert = CleanText(for_ml_pipeline=False)  # BERT
+# Initialise the CleanText class for BoW
+preprocessor_bow = CleanText(for_ml_pipeline=True)
+
+# BERT without shap explanations
+predictor_BERT_base = PredictBERT(with_explanation=False)
+
+# BERT with shap explanations
+predictor_BERT_shap = PredictBERT(with_explanation=True)
 
 # Feature extractor for BoW
 extractor = ExtractFeatures()
@@ -55,29 +69,43 @@ extractor = ExtractFeatures()
 def predict_slow():
     data = request.json
     post_content = data.get("post_content", "")
+    print("\nReceived post:\n", post_content)
 
-    # Clean text for BERT
-    cleaned_text = preprocessor_bert.clean_text(post_content)
+    results = predictor_BERT_shap.predict(post_content)
 
-    # Tokenize the cleaned text
-    inputs = bert_tokenizer(
-        cleaned_text, return_tensors="pt", padding=True, truncation=True
-    )
+    # Print the results without the word scores
+    results_without_word_scores = {
+        k: v for k, v in results.items() if k != "word_scores"
+    }
+    print("\nResults:")
+    for key, value in results_without_word_scores.items():
+        print(f"{key}: {value}")
 
-    # Get logits
-    import torch
+    return jsonify(results)
 
-    with torch.no_grad():
-        outputs = bert_model(**inputs)
 
-    # Get probabilities
-    import torch.nn.functional as F
+# Route for receiving misclassification feedback
+@app.route("/feedback", methods=["POST"])
+def receive_feedback():
+    data = request.json
 
-    probs = F.softmax(outputs.logits, dim=1).detach().numpy()
+    # Extract the values
+    prediction = data.get("prediction")
+    confidence = data.get("confidence")
+    raw_confidence_score = data.get("raw_confidence_score")
+    cleaned_text = data.get("cleaned_text")
+    word_scores = data.get("word_scores")
 
-    prediction = int(probs.argmax(axis=1)[0])
+    # TODO: Save the feedback to a database or file for further analysis.
 
-    return jsonify({"prediction": prediction})
+    # Log the feedback.
+    print("\nMisclassification feedback received:")
+    print("Prediction:", prediction)
+    print("Confidence:", confidence)
+    print("Raw confidence score:", raw_confidence_score)
+    print("Cleaned text:", cleaned_text)
+
+    return jsonify({"message": "Feedback received"}), 200
 
 
 if __name__ == "__main__":
