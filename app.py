@@ -9,10 +9,6 @@ import joblib
 from clean_text import CleanText
 from extract_features import ExtractFeatures
 from scipy.sparse import hstack, csr_matrix
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-import torch
-import torch.nn.functional as F
-import shap
 from predict_BERT import PredictBERT
 
 app = Flask(__name__)
@@ -21,10 +17,6 @@ CORS(app)
 # For BoW model:
 model = joblib.load("models/BoW/bow_model.pkl")
 vectorizer = joblib.load("models/BoW/bow_vectorizer.pkl")
-
-# For BERT model, using Hugging Face:
-bert_model = AutoModelForSequenceClassification.from_pretrained("./models/BERT/model")
-bert_tokenizer = AutoTokenizer.from_pretrained("./models/BERT/tokenizer")
 
 # Initialise the CleanText class for BoW
 preprocessor_bow = CleanText(for_ml_pipeline=True)
