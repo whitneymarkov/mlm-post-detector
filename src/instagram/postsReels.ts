@@ -8,19 +8,33 @@ let lastProcessedShortcode: string | null = null;
  */
 function displayResultBelowArticle(prediction: string) {
   const firstArticle = document.querySelector("article");
-  if (firstArticle) {
-    const resultDiv = document.createElement("div");
-    resultDiv.textContent = `MLM Detection Result: ${prediction}`;
-    resultDiv.style.marginTop = "10px";
-    resultDiv.style.fontWeight = "bold";
-    resultDiv.style.background = "#fff";
-    resultDiv.style.padding = "5px";
-    resultDiv.style.border = "1px solid #ddd";
-
-    firstArticle.insertAdjacentElement("afterend", resultDiv);
-  } else {
+  if (!firstArticle) {
     console.warn("No article found to display results below.");
+    return;
   }
+
+  const existingResultDiv = document.querySelector(
+    ".mlm-detector-result"
+  ) as HTMLDivElement;
+
+  // If the result div already exists, just update the text
+  if (existingResultDiv) {
+    existingResultDiv.textContent = `MLM Detection Result: ${prediction}`;
+    return;
+  }
+
+  // Otherwise, create a new one
+  const resultDiv = document.createElement("div");
+  resultDiv.setAttribute("data-mlm-detector", "result");
+  resultDiv.classList.add("mlm-detector-result"); // a unique class for the result container
+  resultDiv.textContent = `MLM Detection Result: ${prediction}`;
+  resultDiv.style.marginTop = "10px";
+  resultDiv.style.fontWeight = "bold";
+  resultDiv.style.background = "#fff";
+  resultDiv.style.padding = "5px";
+  resultDiv.style.border = "1px solid #ddd";
+
+  firstArticle.insertAdjacentElement("afterend", resultDiv);
 }
 
 /**

@@ -42,6 +42,7 @@ function addOrUpdateButton(article: HTMLElement, shortcode: string) {
     button = document.createElement("button");
     button.textContent = "Analyse post";
     button.classList.add("mlm-detector-button");
+    button.setAttribute("data-mlm-detector", "button");
     button.addEventListener("click", handleButtonClick);
   }
 
@@ -97,7 +98,10 @@ function processAllArticles() {
 let mainObserver: MutationObserver | null = null;
 
 function observeNewArticles() {
-  if (mainObserver) return;
+  if (mainObserver) {
+    processAllArticles();
+    return;
+  }
 
   // Find the first article
   const firstArticle = document.querySelector("article");

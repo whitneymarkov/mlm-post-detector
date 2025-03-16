@@ -1,3 +1,5 @@
+// Handles the communication between the content script and the server
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "analyse") {
     fetch("http://127.0.0.1:5000/analyse", {
