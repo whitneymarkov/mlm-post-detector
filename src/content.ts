@@ -3,10 +3,11 @@
 import { instagramFeed } from "./instagram/observeFeed";
 import { handleSinglePostOrReel } from "./instagram/postsReels";
 import { NavigateEvent, ToggleScanningEvent } from "./types";
+import { injectCSS } from "./utils/injectCSS";
+import { injectNavigateScript } from "./utils/injectNavigateScript";
 
-const script = document.createElement("script");
-script.src = chrome.runtime.getURL("injected.js");
-(document.head || document.documentElement).appendChild(script);
+injectCSS();
+injectNavigateScript();
 
 // Global flag to track scanning state
 let isScanningActive = false;
@@ -28,7 +29,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-// Listen for messages posted to the window (from the injected script)
+// Listen for messages posted to the window (from the navigate script)
 window.addEventListener("message", (event: MessageEvent) => {
   if (event.data && event.data.type) {
     handleMessage(event.data);
@@ -43,7 +44,7 @@ chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
 });
 
 /**
- * Handle messages from the injected script and the background script.
+ * Handle messages from the navigate script and the background script.
  */
 function handleMessage(data: NavigateEvent | ToggleScanningEvent) {
   switch (data.type) {

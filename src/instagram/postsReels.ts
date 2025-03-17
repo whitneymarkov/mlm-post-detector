@@ -1,40 +1,23 @@
 import { instagramApi } from "../api/instagramApi"; // adjust path as needed
+import { DetectionReport } from "../types";
+import { addElementToArticle } from "../utils/addElementToArticle";
+import { analysisResults } from "../utils/analysisResults";
+import { createBadge } from "../utils/createBadge";
 import { extractShortcodeFromUrl } from "../utils/shortCode";
-
-let lastProcessedShortcode: string | null = null;
 
 /**
  * Display the detection result below the first <article>
  */
-function displayResultBelowArticle(prediction: string) {
+function displayResultBelowArticle(shortCode: string, loading = false) {
   const firstArticle = document.querySelector("article");
   if (!firstArticle) {
     console.warn("No article found to display results below.");
     return;
   }
 
-  const existingResultDiv = document.querySelector(
-    ".mlm-detector-result"
-  ) as HTMLDivElement;
-
-  // If the result div already exists, just update the text
-  if (existingResultDiv) {
-    existingResultDiv.textContent = `MLM Detection Result: ${prediction}`;
-    return;
-  }
-
-  // Otherwise, create a new one
-  const resultDiv = document.createElement("div");
-  resultDiv.setAttribute("data-mlm-detector", "result");
-  resultDiv.classList.add("mlm-detector-result"); // a unique class for the result container
-  resultDiv.textContent = `MLM Detection Result: ${prediction}`;
-  resultDiv.style.marginTop = "10px";
-  resultDiv.style.fontWeight = "bold";
-  resultDiv.style.background = "#fff";
-  resultDiv.style.padding = "5px";
-  resultDiv.style.border = "1px solid #ddd";
-
-  firstArticle.insertAdjacentElement("afterend", resultDiv);
+  const badge = createBadge(shortCode, loading);
+  console.log(firstArticle);
+  addElementToArticle(badge, firstArticle);
 }
 
 /**
@@ -49,27 +32,27 @@ export async function handleSinglePostOrReel(pathname: string) {
     return;
   }
 
-  if (shortCode === lastProcessedShortcode) {
-    console.log("Same shortcode as last time, skipping new fetch.");
+  if (analysisResults.has(shortCode)) {
+    console.log("Post already analysed, skipping new fetch.");
+    displayResultBelowArticle(shortCode);
     return;
   }
 
   try {
     const caption = await instagramApi.fetchPost(shortCode);
-    console.log(caption);
-
-    // Update the last processed shortcode
-    lastProcessedShortcode = shortCode;
+    displayResultBelowArticle(shortCode, true);
 
     chrome.runtime.sendMessage(
       { type: "analyse", payload: { post_content: caption } },
       (response) => {
         if (response && response.prediction) {
-          console.log("Prediction:", response.prediction);
-          displayResultBelowArticle(response.prediction);
+          // Save the prediction for this shortcode.
+          analysisResults.set(shortCode, response as DetectionReport);
+          console.log(analysisResults);
         } else {
           console.warn("Analysis failed or no prediction received.");
         }
+        displayResultBelowArticle(shortCode, false);
       }
     );
   } catch (error) {
