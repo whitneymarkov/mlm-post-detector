@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
@@ -8,7 +8,7 @@ export default defineConfig({
     cssCodeSplit: false,
     rollupOptions: {
       input: {
-        popup: "index.html",
+        popup: "popup.html",
         content: "src/content.ts",
         background: "src/background.ts",
       },
@@ -17,7 +17,7 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           // If it's a CSS file, output with a fixed name
           if (assetInfo.names[0] && assetInfo.names[0].endsWith(".css")) {
-            return "index.css";
+            return "global.css";
           }
           // Otherwise, use the default naming with hash.
           return "[name].[hash].[ext]";
@@ -25,5 +25,20 @@ export default defineConfig({
       },
     },
     target: "es2015",
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./setupTests.ts",
+    coverage: {
+      exclude: [
+        "**/dist/**",
+        "**/public/**",
+        "**/node_modules/**",
+        "**/*.config.{js,ts}",
+        "**/src/types.ts",
+        "**/*.d.ts",
+      ],
+    },
   },
 });

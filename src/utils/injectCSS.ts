@@ -3,7 +3,7 @@
  * font URLs with absolute URLs.
  */
 export function injectCSS() {
-  fetch(chrome.runtime.getURL("index.css"))
+  fetch(chrome.runtime.getURL("global.css"))
     .then((res) => res.text())
     .then((cssText) => {
       // Get the extension base URL

@@ -1,3 +1,10 @@
+export interface AnalyseEvent extends MessageEvent {
+  type: "ANALYSE";
+  payload: {
+    post_content: string;
+  };
+}
+
 export interface NavigateEvent extends MessageEvent {
   type: "NAVIGATE_EVENT";
   pathname: string;

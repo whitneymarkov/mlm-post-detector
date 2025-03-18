@@ -21,7 +21,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
  *  Update the UI (in the popup) based on the scanning state and the current tab
  * @param isScanning
  */
-function updateUI(isScanning: boolean, isInstagram = false) {
+export function updateUI(isScanning: boolean, isInstagram = false) {
   const activelyScanning = isScanning && isInstagram;
   const statusElement = document.getElementById("scanning-status");
   const toggleButton = document.getElementById(
@@ -88,7 +88,7 @@ function updateUI(isScanning: boolean, isInstagram = false) {
 /**
  * Toggle the scanning state which the switch button is clicked
  */
-function toggleScanning() {
+export function toggleScanning() {
   chrome.storage.local.get(["isScanning"], (result) => {
     const current = result.isScanning || false;
     const newState = !current;

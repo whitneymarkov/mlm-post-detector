@@ -12,7 +12,7 @@
   ],
   "host_permissions": ["https://*.instagram.com/*", "http://127.0.0.1:5000/*"],
   "action": {
-    "default_popup": "index.html",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16-active.png",
       "48": "icons/icon48-active.png",
@@ -36,7 +36,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["navigate.js", "*.woff2", "index.css"],
+      "resources": ["navigate.js", "*.woff2", "global.css"],
       "matches": ["<all_urls>"]
     }
   ]

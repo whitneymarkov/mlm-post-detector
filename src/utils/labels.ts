@@ -4,8 +4,8 @@ export const labels = {
     General: "Not an MLM related post",
   },
   Button: {
-    default: "Analyse",
+    default: "Analyse post",
     loading: "Analysing...",
-    error: "Error",
+    error: "Analysis failed",
   },
 };
