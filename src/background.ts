@@ -1,6 +1,6 @@
 // Handles the communication between the content script and the server
 
-import { AnalyseEvent } from "./types";
+import { AnalyseEvent, UserFeedbackEvent } from "./types";
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "ANALYSE") {
@@ -19,6 +19,37 @@ export function handleAnalyseMessage(
   sendResponse: Function
 ) {
   fetch("http://127.0.0.1:5000/analyse", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(message.payload),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      sendResponse(data);
+    })
+    .catch((err) => {
+      console.error(err);
+      sendResponse({ error: "Network request failed" });
+    });
+}
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === "DISAGREE") {
+    handleUserFeedback(message, sendResponse);
+    return true; // Keep the messaging channel open
+  }
+});
+
+/**
+ * Handles user feedback from the content script
+ * @param message
+ * @param sendResponse
+ */
+export function handleUserFeedback(
+  message: UserFeedbackEvent,
+  sendResponse: Function
+) {
+  fetch("http://127.0.0.1:5000/feedback", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(message.payload),

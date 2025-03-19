@@ -155,9 +155,13 @@ export class InstagramFeedObserver {
           payload: { post_content: caption },
         },
         (response) => {
-          if (response && response.prediction) {
+          if (response && "prediction" in response) {
+            console.log(response);
             // Save the prediction for this shortcode.
-            analysisResults.set(shortCode, response as DetectionReport);
+            analysisResults.set(shortCode, {
+              ...(response as DetectionReport),
+              reported: false,
+            });
 
             // Replace the button with a badge.
             replaceButtonWithBadge(button, shortCode);

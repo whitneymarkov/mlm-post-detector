@@ -68,7 +68,14 @@ describe("InstagramPostHandler", () => {
     const shortcode = "abc123";
 
     // Pre-populate analysisResults
-    analysisResults.set(shortcode, { prediction: DetectionResult.MLM });
+    analysisResults.set(shortcode, {
+      prediction: DetectionResult.MLM,
+      confidence: 99,
+      raw_confidence_score: 99.999,
+      word_scores: null,
+      cleaned_text: "example text",
+      reported: false,
+    });
     (extractShortcodeFromUrl as any).mockReturnValue(shortcode);
 
     new InstagramPostHandler("/p/abc123/");
@@ -78,6 +85,15 @@ describe("InstagramPostHandler", () => {
   });
 
   it("Should fetch post, send message, update analysisResults, and display badge when shortcode is not present", async () => {
+    const analysisRes = {
+      prediction: DetectionResult.General,
+      confidence: 99,
+      raw_confidence_score: 99.999,
+      word_scores: null,
+      cleaned_text: "example text",
+      reported: false,
+    };
+
     const shortcode = "def456";
     (extractShortcodeFromUrl as any).mockReturnValue(shortcode);
 
@@ -88,7 +104,7 @@ describe("InstagramPostHandler", () => {
     // Simulate a response with a prediction.
     (chrome.runtime.sendMessage as any).mockImplementation(
       (_: any, cb: any) => {
-        cb({ prediction: DetectionResult.General });
+        cb(analysisRes);
       }
     );
 
@@ -101,9 +117,8 @@ describe("InstagramPostHandler", () => {
     expect(instagramApi.fetchPost).toHaveBeenCalledWith(shortcode);
     expect(chrome.runtime.sendMessage).toHaveBeenCalled();
     expect(analysisResults.has(shortcode)).toBe(true);
-    expect(analysisResults.get(shortcode)).toEqual({
-      prediction: DetectionResult.General,
-    });
+    expect(analysisResults.get(shortcode)).toEqual(analysisRes);
+
     // createBadge called twice (loading true and loading false)
     expect(createBadge).toHaveBeenCalledWith(shortcode, true);
     expect(createBadge).toHaveBeenCalledWith(shortcode, false);

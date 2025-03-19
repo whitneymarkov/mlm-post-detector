@@ -1,7 +1,7 @@
 import { DetectionResult } from "../types";
 import { analysisResults } from "./analysisResults";
 import { labels } from "./labels";
-
+import { attachPopover } from "./shapPopover";
 /**
  * Create a badge element to show the result of the analysis
  * @param shortCode
@@ -16,20 +16,30 @@ export function createBadge(
   badge.setAttribute("data-mlm-detector", "badge");
   badge.setAttribute("data-shortcode", shortCode);
 
-  const prediction = analysisResults.get(shortCode)?.prediction;
+  const result = analysisResults.get(shortCode);
 
-  switch (prediction) {
-    case DetectionResult.MLM:
-      badge.classList.add("detected");
-      badge.textContent = labels.Badge.MLM;
-      break;
-    case DetectionResult.General:
-      badge.classList.add("not-detected");
-      badge.textContent = labels.Badge.General;
-      break;
-    default:
-      badge.classList.add("unknown");
-      badge.textContent = loading ? "Analysing..." : "Unknown";
+  if (!result) {
+    badge.classList.add("unknown");
+    badge.textContent = loading ? "Analysing..." : "Unknown";
+    return badge;
+  }
+
+  badge.setAttribute("tabindex", "0"); // Make focusable
+  const { prediction, confidence, word_scores } = result;
+
+  if (prediction === DetectionResult.MLM) {
+    badge.classList.add("detected");
+    badge.textContent = labels.Badge.MLM + " (" + confidence + "%)";
+  }
+
+  if (prediction === DetectionResult.General) {
+    badge.classList.add("not-detected");
+    badge.textContent = labels.Badge.General + " (" + confidence + "%)";
+  }
+
+  // If explainability data exists, initialise Tippy on the badge.
+  if (word_scores && Array.isArray(word_scores) && word_scores.length > 0) {
+    attachPopover(shortCode, badge, result);
   }
 
   return badge;

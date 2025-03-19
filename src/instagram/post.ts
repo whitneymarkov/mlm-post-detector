@@ -33,9 +33,12 @@ export class InstagramPostHandler {
       chrome.runtime.sendMessage(
         { type: "ANALYSE", payload: { post_content: caption } },
         (response) => {
-          if (response && response.prediction) {
+          if (response && "prediction" in response) {
             // Save the prediction
-            analysisResults.set(shortCode, response as DetectionReport);
+            analysisResults.set(shortCode, {
+              ...(response as DetectionReport),
+              reported: false,
+            });
           } else {
             console.warn("Analysis failed or no prediction received.");
           }

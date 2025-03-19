@@ -1,5 +1,4 @@
 // Main content script that is run on Instagram pages, able to access the DOM
-
 import { InstagramFeedObserver } from "./instagram/feed";
 import { InstagramPostHandler } from "./instagram/post";
 import { NavigateEvent, ToggleScanningEvent } from "./types";

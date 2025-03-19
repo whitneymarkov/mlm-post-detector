@@ -1,7 +1,7 @@
 export const labels = {
   Badge: {
-    MLM: "MLM related post",
-    General: "Not an MLM related post",
+    MLM: "MLM related",
+    General: "Not MLM related",
   },
   Button: {
     default: "Analyse post",

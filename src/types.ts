@@ -4,6 +4,10 @@ export interface AnalyseEvent extends MessageEvent {
     post_content: string;
   };
 }
+export interface UserFeedbackEvent extends MessageEvent {
+  type: "DISAGREE";
+  payload: DetectionReport;
+}
 
 export interface NavigateEvent extends MessageEvent {
   type: "NAVIGATE_EVENT";
@@ -14,11 +18,20 @@ export interface ToggleScanningEvent extends MessageEvent {
   isScanning: boolean;
 }
 
+export interface ShapValue {
+  value: number;
+  word: string;
+}
+
 export interface DetectionReport {
   prediction: DetectionResult;
+  confidence: number;
+  raw_confidence_score: number;
+  cleaned_text: string;
+  word_scores: ShapValue[] | null;
 }
 
 export enum DetectionResult {
-  MLM = "mlm",
-  General = "general",
+  General,
+  MLM,
 }
