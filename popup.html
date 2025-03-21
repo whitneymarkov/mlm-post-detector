@@ -9,20 +9,109 @@
   <body class="p-4">
     <div id="popup" class="py-2 px-4 w-64">
       <h1 class="text-lg font-bold text-nowrap mb-2">MLM Detector</h1>
-      <p class="mb-2">
-        This extension uses a trained machine learning model to detect
+      <p class="mb-2 text-sm">
+        This extension uses trained machine learning models to detect
         Multi-Level Marketing (MLM) related posts on Instagram.
       </p>
+
+      <!-- Radio group start -->
+      <fieldset class="mb-4">
+        <legend class="text-sm/6 font-semibold text-gray-900">
+          Model preference:
+        </legend>
+        <div class="mt-2 space-y-2">
+          <div class="flex items-center">
+            <input
+              id="model-basic"
+              name="model"
+              type="radio"
+              checked
+              class="mlm-detector-radio"
+            />
+            <label
+              for="model-basic"
+              class="ml-3 block text-sm/6 font-medium text-gray-900"
+              >Basic</label
+            >
+          </div>
+          <div class="flex items-center">
+            <input
+              id="model-advanced"
+              name="model"
+              type="radio"
+              class="mlm-detector-radio"
+            />
+            <label
+              for="model-advanced"
+              class="ml-3 block text-sm/6 font-medium text-gray-900"
+              >Advanced</label
+            >
+          </div>
+        </div>
+      </fieldset>
+      <!-- Radio group end -->
 
       <!-- Divider start -->
       <div class="relative">
         <div class="absolute inset-0 flex items-center" aria-hidden="true">
-          <div class="w-full border-t border-gray-300"></div>
+          <div class="w-full border-t border-gray-200"></div>
         </div>
       </div>
       <!-- Divider end -->
 
-      <div class="flex items-center justify-center pt-3">
+      <!-- Checkbox start -->
+      <div class="flex gap-3 mb-3 pt-4">
+        <div class="flex h-6 shrink-0 items-center">
+          <div class="group grid size-4 grid-cols-1">
+            <input
+              id="explanations-checkbox"
+              aria-describedby="comments-description"
+              name="explanations"
+              type="checkbox"
+              checked
+            />
+            <svg
+              class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                class="opacity-0 group-has-[:checked]:opacity-100"
+                d="M3 8L6 11L11 3.5"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                class="opacity-0 group-has-[:indeterminate]:opacity-100"
+                d="M3 7H11"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="text-sm/6">
+          <label for="comments" class="font-medium text-gray-900"
+            >Explanations</label
+          >
+          <p id="comments-description" class="text-gray-500">
+            Get a detailed break of results. Slower performance.
+          </p>
+        </div>
+      </div>
+      <!-- Checkbox end -->
+
+      <!-- Divider start -->
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+          <div class="w-full border-t border-gray-200"></div>
+        </div>
+      </div>
+      <!-- Divider end -->
+
+      <div class="flex items-center justify-center pt-4">
         <!-- Toggle label start -->
         <span class="mr-3 text-sm text-nowrap">
           <span class="font-medium text-gray-500">Scanning: </span>
@@ -35,15 +124,13 @@
         <button
           id="toggle-btn"
           type="button"
-          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
           role="switch"
           aria-checked="false"
         >
           <span class="sr-only">Use setting</span>
-          <span
-            class="pointer-events-none relative inline-block size-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-          >
+          <span id="toggle-btn-knob">
             <span
+              id="toggle-btn-off-icon"
               class="absolute inset-0 flex size-full items-center justify-center opacity-100 transition-opacity duration-200 ease-in"
               aria-hidden="true"
             >
@@ -58,6 +145,7 @@
               </svg>
             </span>
             <span
+              id="toggle-btn-on-icon"
               class="absolute inset-0 flex size-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out"
               aria-hidden="true"
             >
@@ -73,7 +161,7 @@
             </span>
           </span>
         </button>
-        <!-- Tailwind toggle button end -->
+        <!-- Toggle button end -->
       </div>
     </div>
     <script type="module" src="/src/popup.ts"></script>

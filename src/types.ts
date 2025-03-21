@@ -1,3 +1,8 @@
+export enum ModelType {
+  BASIC = "basic",
+  ADVANCED = "advanced",
+}
+
 export interface AnalyseEvent extends MessageEvent {
   type: "ANALYSE";
   payload: {

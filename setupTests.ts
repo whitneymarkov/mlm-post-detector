@@ -10,6 +10,9 @@ import { vi } from "vitest";
 
       return `chrome-extension://extensionID/${path}`;
     }),
+    onInstalled: {
+      addListener: vi.fn(),
+    },
     onMessage: {
       addListener: vi.fn(),
     },

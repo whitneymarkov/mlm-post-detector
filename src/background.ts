@@ -18,19 +18,33 @@ export function handleAnalyseMessage(
   message: AnalyseEvent,
   sendResponse: Function
 ) {
-  fetch("http://127.0.0.1:5000/analyse", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(message.payload),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      sendResponse(data);
+  chrome.storage.local.get(["modelType", "explanations"], (result) => {
+    const modelType = result.modelType || "advanced";
+    const explanations =
+      result.explanations !== undefined ? result.explanations : true;
+
+    // Build the endpoint based on settings
+    let endpoint = `http://127.0.0.1:5000/analyse/${modelType}`;
+
+    // Only allow explanations for the advanced model
+    if (modelType === "advanced") {
+      endpoint += `?explanations=${explanations.toString()}`;
+    }
+
+    fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(message.payload),
     })
-    .catch((err) => {
-      console.error(err);
-      sendResponse({ error: "Network request failed" });
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        sendResponse(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        sendResponse({ error: "Network request failed" });
+      });
+  });
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
