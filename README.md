@@ -1,50 +1,44 @@
-# React + TypeScript + Vite
+# MLM Post Detector (Chrome Extension)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Vite-based Chrome extension that detects Multi-Level Marketing (MLM) related content on Instagram. By default, it uses an advanced BERT model with SHAP explanations.
 
-Currently, two official plugins are available:
+![Screenshot of the extension popup](mlm-detector-preview.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Installation & Build
 
-## Expanding the ESLint configuration
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+2. **Build the extension:**
+   ```bash
+   npm run build
+   ```
+   - This outputs a `dist/` folder containing the production-ready extension.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Loading into Google Chrome
 
-- Configure the top-level `parserOptions` property like this:
+Before loading the extension make sure you have the Flask server running.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1. **Open Chrome** and navigate to `chrome://extensions/`.
+2. **Enable developer mode** (toggle in the top-right corner).
+3. **Click "Load unpacked"** and select the `dist/` folder.  
+   Chrome will load the extension as an unpacked extension.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Usage
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+1. **Navigate to** [instagram.com](https://www.instagram.com) and log in. Graders will be provided with an account via the Coursera project submission comments should they not wish to use their own.
+2. **Click the extension icon** to open the popup.
+   - By default, the extension uses the **Advanced** (BERT) model with **Explanations** enabled.
+   - You can switch to **Basic** (BoW) or toggle explanations in the popup’s settings.
+3. **Click "Analyse Post"** on any Instagram post in the main feed to see the model’s prediction.
+4. **Navigate directly to a single post** from a profile or the Discover page for automatic predictions.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## Testing & Coverage
+
+- **View coverage report**:  
+  Open `coverage/index.html` in your browser (e.g., `file:///path/to/your/project/coverage/index.html`).
+- **Run tests** (unit tests and coverage report in terminal):
+  ```bash
+  npm run test
+  ```

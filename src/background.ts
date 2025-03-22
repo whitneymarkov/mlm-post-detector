@@ -24,7 +24,7 @@ export function handleAnalyseMessage(
       result.explanations !== undefined ? result.explanations : true;
 
     // Build the endpoint based on settings
-    let endpoint = `http://127.0.0.1:5000/analyse/${modelType}`;
+    let endpoint = `${import.meta.env.VITE_API_BASE_URL}/analyse/${modelType}`;
 
     // Only allow explanations for the advanced model
     if (modelType === "advanced") {
@@ -63,7 +63,7 @@ export function handleUserFeedback(
   message: UserFeedbackEvent,
   sendResponse: Function
 ) {
-  fetch("http://127.0.0.1:5000/feedback", {
+  fetch(`${import.meta.env.VITE_API_BASE_URL}/feedback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(message.payload),
@@ -90,6 +90,7 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
     if (tab.url) {
       updateIcon(activeInfo.tabId, tab.url);
+      pingServer(tab.url);
     }
   });
 });
@@ -120,5 +121,18 @@ export function updateIcon(tabId: number, url: string) {
         "128": "icons/icon128-disabled.png",
       },
     });
+  }
+}
+
+/**
+ * Sends a ping to the server to warm it up when the user is on Instagram
+ * @param url
+ */
+export function pingServer(url: string) {
+  if (url.includes("instagram.com")) {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/ping`)
+      .then((response) => response.text())
+      .then((text) => console.log("Server warmed up:", text))
+      .catch((err) => console.error("Ping failed:", err));
   }
 }

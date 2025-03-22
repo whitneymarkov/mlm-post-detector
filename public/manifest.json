@@ -8,9 +8,9 @@
     "activeTab",
     "scripting",
     "storage",
-    "http://127.0.0.1:5000/"
+    "http://localhost:4200/"
   ],
-  "host_permissions": ["https://*.instagram.com/*", "http://127.0.0.1:5000/*"],
+  "host_permissions": ["https://*.instagram.com/*", "http://localhost:4200/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
