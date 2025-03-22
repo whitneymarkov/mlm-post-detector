@@ -10,6 +10,7 @@ from predict_BoW import PredictBoW
 from predict_BERT import PredictBERT
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 CORS(app)
 
 # BoW
@@ -22,7 +23,14 @@ predictor_BERT_base = PredictBERT(with_explanation=False)
 predictor_BERT_shap = PredictBERT(with_explanation=True)
 
 
-@app.route("/analyse/", defaults={"model_type": "advanced"}, methods=["POST"])
+# Ping route for health check
+@app.route("/ping", methods=["GET"])
+def ping():
+    print("\nPing received\n")
+    return "pong", 200
+
+
+@app.route("/analyse", defaults={"model_type": "advanced"}, methods=["POST"])
 @app.route("/analyse/<model_type>", methods=["POST"])
 def predict(model_type):
     data = request.json
@@ -82,4 +90,4 @@ def receive_feedback():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="localhost", port=4200)

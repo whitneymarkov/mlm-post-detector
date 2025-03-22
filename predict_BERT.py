@@ -7,16 +7,29 @@ import math
 
 
 class PredictBERT:
-    def __init__(self, with_explanation=False):
+    def __init__(
+        self, with_explanation=False, model=None, tokenizer=None, explainer=None
+    ):
         self.cleaner = CleanText(for_ml_pipeline=False)
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            "./models/BERT/model"
+        self.model = (
+            model
+            if model is not None
+            else AutoModelForSequenceClassification.from_pretrained(
+                "./models/BERT/model"
+            )
         )
-        self.tokenizer = AutoTokenizer.from_pretrained("./models/BERT/tokenizer")
+        self.tokenizer = (
+            tokenizer
+            if tokenizer is not None
+            else AutoTokenizer.from_pretrained("./models/BERT/tokenizer")
+        )
         self.with_explanation = with_explanation
-
         if self.with_explanation:
-            self.explainer = shap.Explainer(self.predict_probabilities, self.tokenizer)
+            self.explainer = (
+                explainer
+                if explainer is not None
+                else shap.Explainer(self.predict_probabilities, self.tokenizer)
+            )
 
     def predict_probabilities(self, texts):
         # Ensure the input is a list of strings
