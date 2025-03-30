@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "MLM post detector",
+  "version": "1.0",
+  "description": "A Chrome extension that uses machine learning to detect Multi-level Marketing related content",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "scripting",
+    "storage",
+    "http://localhost:4200/"
+  ],
+  "host_permissions": ["https://*.instagram.com/*", "http://localhost:4200/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16-active.png",
+      "48": "icons/icon48-active.png",
+      "128": "icons/icon128-active.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16-active.png",
+    "48": "icons/icon48-active.png",
+    "128": "icons/icon128-active.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.instagram.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["navigate.js", "*.woff2", "global.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
