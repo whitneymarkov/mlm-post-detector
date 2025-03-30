@@ -1,6 +1,6 @@
 # MLM Post Detector
 
-This repository contains both the **server** (a Flask API) and the **client** (a Chrome extension built with Vite) for detecting MLM-related content.
+This repository contains the both **server** (a Flask API) and the **client** (a Chrome extension built with Vite) for detecting Multi-Level Marketing (MLM) related content. It also includes the MLM post **dataset** and a **jupyter notebook** that outlines our model training process.
 
 ![Screenshot of the extension](mlm-detector-preview.png)
 
