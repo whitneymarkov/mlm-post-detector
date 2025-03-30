@@ -4,9 +4,13 @@ A lightweight Flask server for social media post classification (using trained B
 
 ## Setup
 
-1. **Create and activate a virtual environment.**
+1. **Change to server directory:**
+   ```bash
+   cd server
+   ```
+2. **Create and activate a virtual environment.**
 
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
