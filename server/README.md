@@ -66,10 +66,11 @@ _(Runs in debug mode with `TOKENIZERS_PARALLELISM` disabled.)_
 - **Purpose:** Receive misclassification feedback.
 - **Request Body:** JSON with prediction data (prediction, confidence, cleaned text, etc.)
 
-## Running Tests
+## Testing & Coverage
 
-Run all tests with:
-
-```bash
-pytest
-```
+- **View coverage report**:  
+  Open `htmlcov/index.html` in your browser (e.g., `file:///path/to/your/project/htmlcov/index.html`).
+- **Run tests** (unit tests and coverage report in terminal):
+  ```bash
+  pytest
+  ```
